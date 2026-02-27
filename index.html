@@ -248,14 +248,11 @@
     
     <div class="chat-container">
         <div class="chat-box" id="chatBox">
-            <!-- ⚠️ 【开场白修改位置】修改下面的文本 -->
             <div class="message ai">你好！我是AI心理画像助手。我可以帮助你了解自己的心理状态，生成个性化的心理画像报告。点击下方的"开始心理画像"按钮，或直接在输入框中告诉我你想聊什么。</div>
         </div>
         
         <div class="input-section">
-            <!-- ⚠️ 【快捷按钮修改位置】只保留一个按钮 -->
             <div class="quick-btns">
-                <!-- ⚠️ 【快捷按钮发送文本修改位置】修改 onclick 中的文本 -->
                 <button class="quick-btn" onclick="quickSend('开始心理画像')">🎯 开始心理画像</button>
             </div>
             
@@ -278,7 +275,7 @@
 
     <script>
         // ⚠️ 【Worker URL 配置位置】修改为你的 Cloudflare Worker 地址
-        const WORKER_URL = 'https:/aipsychologicalchat.tielurenou86.workers.dev';
+        const WORKER_URL = 'https://aipsychologicalchat.tielurenou86.workers.dev/';
         
         const chatBox = document.getElementById('chatBox');
         const userInput = document.getElementById('userInput');
@@ -385,4 +382,5 @@
         };
     </script>
 </body>
+
 </html>
