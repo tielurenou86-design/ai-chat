@@ -5,376 +5,269 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>AI Student Portraits · 多模态版</title>
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
+        :root {
+            --bg-color: #fdf8e9;
+            --primary-color: #6a5acd;
+            --primary-hover: #5a4abd;
+            --text-color: #333;
+            --ai-bubble: #ffffff;
+            --user-bubble: #e6e6fa;
+        }
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-            background-color: #faf3e0;
-            min-height: 100vh;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--bg-color);
+            margin: 0;
             display: flex;
             flex-direction: column;
+            height: 100vh;
+            color: var(--text-color);
         }
         .header {
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(10px);
-            padding: 20px;
             text-align: center;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
-            position: sticky;
-            top: 0;
-            z-index: 100;
+            padding: 20px 0;
+            background-color: rgba(255, 255, 255, 0.5);
+            box-shadow: 0 2px 10px rgba(0,0,0,0.02);
         }
-        .header h1 { font-size: 24px; color: #1f2937; margin-bottom: 4px; }
-        .header p { font-size: 14px; color: #6b7280; }
+        .header h1 { font-size: 22px; margin: 0; }
+        .header p { font-size: 13px; color: #888; margin-top: 5px; }
+
         .chat-container {
-            flex: 1;
-            max-width: 800px;
-            width: 100%;
-            margin: 0 auto;
-            padding: 20px;
-            display: flex;
-            flex-direction: column;
-        }
-        .chat-box {
             flex: 1;
             overflow-y: auto;
             padding: 20px;
             display: flex;
             flex-direction: column;
-            gap: 16px;
-            margin-bottom: 20px;
-        }
-        .message {
-            max-width: 85%;
-            padding: 14px 18px;
-            border-radius: 20px;
-            line-height: 1.6;
-            font-size: 15px;
-            animation: fadeInUp 0.3s ease-out;
-            word-wrap: break-word;
-            white-space: pre-wrap;
-        }
-        @keyframes fadeInUp {
-            from { opacity: 0; transform: translateY(20px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-        .user {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            align-self: flex-end;
-            border-bottom-right-radius: 6px;
-            box-shadow: 0 4px 15px rgba(102,126,234,0.3);
-        }
-        .ai {
-            background: white;
-            color: #1f2937;
-            align-self: flex-start;
-            border-bottom-left-radius: 6px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
-        }
-        .input-section {
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(10px);
-            border-radius: 24px;
-            padding: 20px;
-            box-shadow: 0 -4px 20px rgba(0,0,0,0.05);
-        }
-        .quick-btns {
-            display: flex;
-            gap: 10px;
-            overflow-x: auto;
-            padding-bottom: 12px;
-            margin-bottom: 12px;
-            scrollbar-width: none;
-        }
-        .quick-btn {
-            padding: 12px 24px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            border: none;
-            border-radius: 24px;
-            white-space: nowrap;
-            cursor: pointer;
-            font-size: 15px;
-            color: white;
-            font-weight: 600;
-            transition: all 0.2s;
-            box-shadow: 0 4px 15px rgba(102,126,234,0.3);
-        }
-        .quick-btn:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(102,126,234,0.4); }
-        .image-preview-area {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 10px;
-            margin-bottom: 10px;
-            padding: 10px;
-            background: #f9f9f9;
-            border-radius: 16px;
-        }
-        .image-preview {
-            position: relative;
-            width: 80px;
-            height: 80px;
-            border-radius: 8px;
-            overflow: hidden;
-            border: 1px solid #ddd;
-        }
-        .image-preview img {
+            gap: 20px;
+            max-width: 900px;
             width: 100%;
-            height: 100%;
-            object-fit: cover;
+            margin: 0 auto;
         }
-        .image-preview .remove-btn {
-            position: absolute;
-            top: 2px;
-            right: 2px;
-            background: rgba(0,0,0,0.5);
-            color: white;
-            border: none;
-            border-radius: 50%;
-            width: 20px;
-            height: 20px;
-            font-size: 12px;
-            cursor: pointer;
+        .message-row {
             display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-        .upload-btn {
-            padding: 14px;
-            background: #e5e7eb;
-            border: none;
-            border-radius: 20px;
-            cursor: pointer;
-            font-size: 15px;
-            color: #4b5563;
-            transition: all 0.2s;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-        .upload-btn:hover { background: #d1d5db; }
-        .input-box {
-            display: flex;
+            width: 100%;
             gap: 12px;
-            align-items: flex-end;
         }
-        textarea {
-            flex: 1;
-            padding: 14px 18px;
-            border: 2px solid #e5e7eb;
-            border-radius: 20px;
-            outline: none;
-            font-size: 15px;
-            resize: none;
-            font-family: inherit;
-            line-height: 1.5;
-            max-height: 120px;
-            min-height: 52px;
-        }
-        textarea:focus { border-color: #667eea; }
-        .send-btn {
-            padding: 14px 28px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            border: none;
-            border-radius: 20px;
-            cursor: pointer;
-            font-weight: 600;
-            font-size: 15px;
-            transition: all 0.2s;
-            box-shadow: 0 4px 15px rgba(102,126,234,0.3);
-        }
-        .send-btn:hover:not(:disabled) { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(102,126,234,0.4); }
-        .send-btn:disabled { opacity: 0.6; cursor: not-allowed; }
-        .typing {
+        .message-row.user { justify-content: flex-end; }
+        .message-row.ai { justify-content: flex-start; }
+
+        .avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
             display: flex;
             align-items: center;
-            gap: 6px;
-            padding: 18px;
+            justify-content: center;
+            font-size: 20px;
+            flex-shrink: 0;
         }
-        .typing span {
-            width: 10px;
-            height: 10px;
-            background: #9ca3af;
+        .ai .avatar { background-color: var(--primary-color); color: white; }
+        .user .avatar { order: 2; background-color: #ddd; color: #666; }
+
+        .bubble {
+            max-width: 70%;
+            padding: 12px 16px;
+            border-radius: 18px;
+            font-size: 15px;
+            line-height: 1.5;
+            position: relative;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        }
+        .ai .bubble {
+            background-color: var(--ai-bubble);
+            border-bottom-left-radius: 4px;
+            color: var(--text-color);
+        }
+        .user .bubble {
+            background-color: var(--user-bubble);
+            border-bottom-right-radius: 4px;
+            color: #333;
+            order: 1;
+        }
+        .bubble img {
+            max-width: 100%;
+            border-radius: 8px;
+            margin-bottom: 8px;
+            display: block;
+        }
+
+        /* 输入区 */
+        .input-area {
+            padding: 20px;
+            background: transparent;
+            display: flex;
+            justify-content: center;
+        }
+        .input-box-wrapper {
+            background: white;
+            padding: 12px 20px;
+            border-radius: 30px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            width: 100%;
+            max-width: 800px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+        }
+        #user-input {
+            flex: 1;
+            border: none;
+            outline: none;
+            font-size: 16px;
+            padding: 8px 0;
+        }
+        .btn-icon {
+            background: #f0f0f0;
+            border: none;
+            width: 38px;
+            height: 38px;
             border-radius: 50%;
-            animation: typing 1.4s infinite ease-in-out both;
+            cursor: pointer;
+            transition: 0.2s;
         }
-        .typing span:nth-child(1) { animation-delay: -0.32s; }
-        .typing span:nth-child(2) { animation-delay: -0.16s; }
-        @keyframes typing {
-            0%,80%,100% { transform: scale(0); }
-            40% { transform: scale(1); }
+        .btn-icon:hover { background: #e0e0e0; }
+        .btn-send {
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 8px 20px;
+            border-radius: 20px;
+            font-weight: bold;
+            cursor: pointer;
         }
-        .error { background: #fee2e2 !important; color: #dc2626 !important; }
-        .system-info {
-            text-align: center;
-            color: #9ca3af;
-            font-size: 12px;
-            padding: 10px;
+        .preview-area {
+            position: absolute;
+            bottom: 90px;
+            display: flex;
+            gap: 10px;
         }
-        @media (max-width: 640px) {
-            .chat-container { padding: 10px; }
-            .message { max-width: 90%; font-size: 14px; }
-            .header h1 { font-size: 20px; }
-            .quick-btn { padding: 10px 20px; font-size: 14px; }
-        }
+        .preview-area img { height: 50px; border-radius: 6px; border: 2px solid white; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
     </style>
 </head>
 <body>
 
     <div class="header">
-        <h1>🎓 AI Student Portraits · 多模态版</h1>
-        <p>学生AI心理画像分析系统（支持视觉分析）</p>
+        <h1>🎓 AI Student Portraits</h1>
+        <p>学生心理画像分析系统 (豆包1.5视觉支持)</p>
     </div>
 
     <div class="chat-container" id="chat-container">
-        <div class="warning-box" id="persona-warning">
-            ⚠️ 人设文件加载失败，请确保存在 persona.txt 文件。
+        <div class="message-row ai">
+            <div class="avatar">🛡️</div>
+            <div class="bubble">你好！我是你的心理画像助手。你可以直接向我提问，或者上传照片让我进行分析。</div>
         </div>
-        </div>
+    </div>
 
     <div class="input-area">
+        <div class="preview-area" id="preview-area"></div>
         <div class="input-box-wrapper">
-            <div class="top-buttons">
-                <button class="btn-start" id="start-btn">🎯 开始心理画像</button>
-            </div>
-            <div class="preview-area" id="preview-area"></div>
-            <div class="input-row">
-                <button class="btn-icon" onclick="document.getElementById('file-input').click()">📷</button>
-                <input type="file" id="file-input" accept="image/*" multiple>
-                <input type="text" id="user-input" placeholder="输入你想说的话，按 Enter 发送..." onkeypress="handleKeyPress(event)">
-                <button class="btn-send" id="send-btn" onclick="sendMessage()">发送</button>
-            </div>
+            <button class="btn-icon" onclick="document.getElementById('file-input').click()">📷</button>
+            <input type="file" id="file-input" accept="image/*" multiple style="display:none" onchange="handleFile(event)">
+            <input type="text" id="user-input" placeholder="输入你想说的话..." onkeypress="if(event.key==='Enter') sendMessage()">
+            <button class="btn-send" id="send-btn" onclick="sendMessage()">发送</button>
         </div>
     </div>
 
     <script>
-        const WORKER_URL = "https://api.aipsychological86.online"; 
-        
-        let systemPersona = "";
+        const WORKER_URL = "https://api.aipsychological86.online";
         let chatHistory = [];
-        let selectedImagesBase64 = [];
+        let currentImages = [];
 
-        // 页面加载时获取 persona.txt
+        // 尝试加载人设，但不弹红框，如果失败就静默处理
         window.onload = async () => {
             try {
-                const response = await fetch('./persona.txt');
-                if (response.ok) {
-                    systemPersona = await response.text();
-                    chatHistory.push({ role: "system", content: systemPersona });
-                } else {
-                    document.getElementById('persona-warning').style.display = 'block';
+                const res = await fetch('./persona.txt');
+                if (res.ok) {
+                    const persona = await res.text();
+                    chatHistory.push({ role: "system", content: persona });
                 }
-            } catch (error) {
-                document.getElementById('persona-warning').style.display = 'block';
-            }
+            } catch (e) { console.log("Persona not loaded"); }
         };
 
-        // 处理图片上传预览并转换为 Base64
-        document.getElementById('file-input').addEventListener('change', function(event) {
-            const files = event.target.files;
-            const previewArea = document.getElementById('preview-area');
-            
+        function handleFile(e) {
+            const files = e.target.files;
+            const preview = document.getElementById('preview-area');
             for (let file of files) {
                 const reader = new FileReader();
-                reader.onload = function(e) {
-                    const base64Data = e.target.result;
-                    selectedImagesBase64.push(base64Data);
-                    
+                reader.onload = (event) => {
+                    currentImages.push(event.target.result);
                     const img = document.createElement('img');
-                    img.src = base64Data;
-                    previewArea.appendChild(img);
-                }
+                    img.src = event.target.result;
+                    preview.appendChild(img);
+                };
                 reader.readAsDataURL(file);
-            }
-        });
-
-        function handleKeyPress(event) {
-            if (event.key === 'Enter') {
-                sendMessage();
             }
         }
 
         async function sendMessage() {
-            const inputField = document.getElementById('user-input');
-            const text = inputField.value.trim();
-            
-            if (!text && selectedImagesBase64.length === 0) return;
+            const input = document.getElementById('user-input');
+            const btn = document.getElementById('send-btn');
+            const text = input.value.trim();
+            if (!text && currentImages.length === 0) return;
 
-            // 1. 构建当前消息
-            let messageContent = [];
-            if (text) messageContent.push({ type: "text", text: text });
-            selectedImagesBase64.forEach(base64 => {
-                messageContent.push({ type: "image_url", image_url: { url: base64 } });
-            });
+            let contentArr = [];
+            if (text) contentArr.push({ type: "text", text: text });
+            currentImages.forEach(img => contentArr.push({ type: "image_url", image_url: { url: img } }));
 
-            const userMessage = { role: "user", content: messageContent };
-            chatHistory.push(userMessage);
+            appendUI("user", text, currentImages);
+            chatHistory.push({ role: "user", content: contentArr });
 
-            // 2. 更新 UI
-            appendMessageToUI("user", text, selectedImagesBase64);
-            
-            // 清空输入框和预览区
-            inputField.value = '';
-            selectedImagesBase64 = [];
-            document.getElementById('preview-area').innerHTML = '';
-            document.getElementById('send-btn').innerText = '发送中...';
-            document.getElementById('send-btn').disabled = true;
+            // 重置
+            input.value = "";
+            currentImages = [];
+            document.getElementById('preview-area').innerHTML = "";
+            btn.disabled = true;
 
-            // 3. 发送请求给 Cloudflare Worker
             try {
                 const response = await fetch(WORKER_URL, {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
                     body: JSON.stringify({ messages: chatHistory })
                 });
-
                 const data = await response.json();
-                
-                if (data.choices && data.choices.length > 0) {
-                    const aiReply = data.choices[0].message.content;
-                    chatHistory.push({ role: "assistant", content: aiReply });
-                    appendMessageToUI("assistant", aiReply, []);
-                } else {
-                    appendMessageToUI("assistant", "API 请求返回异常：" + JSON.stringify(data), []);
-                }
-            } catch (error) {
-                appendMessageToUI("assistant", "请求失败，请检查网络或后端配置。" + error.message, []);
+                const reply = data.choices[0].message.content;
+                appendUI("ai", reply);
+                chatHistory.push({ role: "assistant", content: reply });
+            } catch (err) {
+                appendUI("ai", "连接失败，请检查网络或后端配置。");
             } finally {
-                document.getElementById('send-btn').innerText = '发送';
-                document.getElementById('send-btn').disabled = false;
+                btn.disabled = false;
             }
         }
 
-        function appendMessageToUI(role, text, imagesBase64) {
+        function appendUI(role, text, images = []) {
             const container = document.getElementById('chat-container');
-            const msgDiv = document.createElement('div');
-            msgDiv.className = `message ${role}`;
-            
-            if (imagesBase64 && imagesBase64.length > 0) {
-                imagesBase64.forEach(img => {
-                    const imgElem = document.createElement('img');
-                    imgElem.src = img;
-                    msgDiv.appendChild(imgElem);
+            const row = document.createElement('div');
+            row.className = `message-row ${role}`;
+
+            const avatar = document.createElement('div');
+            avatar.className = 'avatar';
+            avatar.innerText = role === 'ai' ? '🛡️' : '👤';
+
+            const bubble = document.createElement('div');
+            bubble.className = 'bubble';
+
+            if (images.length > 0) {
+                images.forEach(src => {
+                    const img = document.createElement('img');
+                    img.src = src;
+                    bubble.appendChild(img);
                 });
             }
             if (text) {
-                const textDiv = document.createElement('div');
-                textDiv.innerText = text;
-                msgDiv.appendChild(textDiv);
+                const p = document.createElement('span');
+                p.innerText = text;
+                bubble.appendChild(p);
             }
-            
-            container.appendChild(msgDiv);
+
+            row.appendChild(avatar);
+            row.appendChild(bubble);
+            container.appendChild(row);
             container.scrollTop = container.scrollHeight;
         }
-
-        // 绑定“开始心理画像”按钮（可自定义发送特定的初始 Prompt）
-        document.getElementById('start-btn').addEventListener('click', () => {
-            document.getElementById('user-input').value = "请根据我接下来提供的信息，开始进行心理画像分析。";
-            sendMessage();
-        });
     </script>
 </body>
 </html>
+
 
 
 
