@@ -1,11 +1,11 @@
-<!DOCTYPE html>
+<!DOCTYPE html>       
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>AI Student Portraits · 多模态版</title>
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
+         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
             background-color: #faf3e0;
@@ -217,6 +217,7 @@
             .header h1 { font-size: 20px; }
             .quick-btn { padding: 10px 20px; font-size: 14px; }
         }
+    <!DOCTYPE html>
     </style>
 </head>
 <body>
@@ -254,8 +255,10 @@
 
     <script>
         // ========== 配置 ==========
-        const WORKER_URL = 'https://aipsychological86.online';
-        
+        const WORKER_URL = 'https://api.aipsychological86.online';  // 改为 API 子域名
+        // 硬编码 system prompt（原 persona.txt 内容）
+        const SYSTEM_PROMPT = `你是一位专业的AI心理画像助手，擅长通过对话和图片分析学生的心理状态，生成个性化的心理画像报告。你的回答应当温暖、专业、有洞察力。`;
+
         // ========== 全局变量 ==========
         const chatBox = document.getElementById('chatBox');
         const userInput = document.getElementById('userInput');
@@ -265,24 +268,13 @@
         const imagePreviewArea = document.getElementById('imagePreviewArea');
         
         let isLoading = false;
-        let conversation = [];                 // 完整对话历史（包含 system prompt）
-        let systemPrompt = '';                 // 从 persona.txt 加载
-        let selectedFiles = [];                 // 当前选中的图片文件
+        let conversation = [{ role: 'system', content: SYSTEM_PROMPT }];  // 直接包含 system
+        let selectedFiles = [];
 
         // ========== 初始化 ==========
-        window.onload = async () => {
+        window.onload = () => {
             userInput.focus();
-            try {
-                const response = await fetch('/persona.txt');
-                systemPrompt = await response.text();
-                // 添加开场白（人设文件中可能已包含，但为了视觉友好单独加一条）
-                addMessage('你好！我是AI心理画像助手。我可以帮助你了解自己的心理状态，生成个性化的心理画像报告。点击下方的"开始心理画像"按钮，或直接输入文字并上传图片，我会结合图片内容进行分析。', 'ai');
-                // 将 system prompt 存入对话历史（但不会显示）
-                conversation.push({ role: 'system', content: systemPrompt });
-            } catch (error) {
-                console.error('读取人设文件失败:', error);
-                addMessage('⚠️ 人设文件加载失败，请确保存在 persona.txt 文件。', 'ai', true);
-            }
+            addMessage('你好！我是AI心理画像助手。我可以帮助你了解自己的心理状态，生成个性化的心理画像报告。点击下方的"开始心理画像"按钮，或直接输入文字并上传图片，我会结合图片内容进行分析。', 'ai');
         };
 
         // ========== 图片上传与预览 ==========
@@ -373,11 +365,11 @@
             if (text) {
                 conversation.push({ role: 'user', content: text });
             } else {
-                // 如果只有图片没有文字，添加一个占位消息，后端会自动合并
-                conversation.push({ role: 'user', content: '[用户上传了图片]' });
+                // 只有图片没有文字，添加一个空字符串（后端会补充默认提示）
+                conversation.push({ role: 'user', content: '' });
             }
 
-            // 2. 在界面上显示用户消息（文字+图片提示）
+            // 2. 在界面上显示用户消息
             if (text) {
                 addMessage(text, 'user');
             }
@@ -394,9 +386,7 @@
 
             // 4. 构造 FormData
             const formData = new FormData();
-            // 将整个对话历史（包含刚刚加入的用户消息）序列化
             formData.append('messages', JSON.stringify(conversation));
-            // 添加图片文件
             filesToSend.forEach((file, i) => {
                 formData.append(`image${i}`, file);
             });
@@ -420,22 +410,23 @@
 
                 const reply = data.choices[0].message.content;
                 addMessage(reply, 'ai');
-                // 将 AI 回复存入对话历史
                 conversation.push({ role: 'assistant', content: reply });
 
             } catch (error) {
                 hideTyping();
                 addMessage('抱歉，连接出现问题：' + error.message + '\n\n请检查网络连接或稍后重试。', 'ai', true);
                 console.error('Error:', error);
-                // 如果出错，需要从 conversation 中移除刚刚添加的用户消息吗？为了简单，保留但可能导致上下文错误。更严谨的做法是回滚，但为了简洁先保留。
+                // 出错时移除刚刚添加的用户消息，避免上下文混乱
+                conversation.pop(); // 移除刚才 push 的 user 消息
+            } finally {
+                isLoading = false;
+                sendBtn.disabled = false;
+                userInput.focus();
             }
-
-            isLoading = false;
-            sendBtn.disabled = false;
-            userInput.focus();
         }
     </script>
 </body>
 </html>
+
 
 
