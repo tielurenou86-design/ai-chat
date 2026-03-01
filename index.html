@@ -1,433 +1,317 @@
-<!DOCTYPE html>       
+<!DOCTYPE html>
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>AI Student Portraits · 多模态版</title>
     <style>
-         * { margin: 0; padding: 0; box-sizing: border-box; }
+        :root {
+            --bg-color: #fdf8e9;
+            --primary-color: #6a5acd;
+            --primary-hover: #5a4abd;
+            --text-color: #333;
+        }
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-            background-color: #faf3e0;
-            min-height: 100vh;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--bg-color);
+            margin: 0;
             display: flex;
             flex-direction: column;
+            height: 100vh;
+            color: var(--text-color);
         }
         .header {
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(10px);
-            padding: 20px;
             text-align: center;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
-            position: sticky;
-            top: 0;
-            z-index: 100;
+            padding: 20px 0;
+            background-color: rgba(255, 255, 255, 0.5);
         }
-        .header h1 { font-size: 24px; color: #1f2937; margin-bottom: 4px; }
-        .header p { font-size: 14px; color: #6b7280; }
+        .header h1 {
+            font-size: 24px;
+            margin: 0 0 5px 0;
+        }
+        .header p {
+            font-size: 14px;
+            color: #666;
+            margin: 0;
+        }
         .chat-container {
-            flex: 1;
-            max-width: 800px;
-            width: 100%;
-            margin: 0 auto;
-            padding: 20px;
-            display: flex;
-            flex-direction: column;
-        }
-        .chat-box {
             flex: 1;
             overflow-y: auto;
             padding: 20px;
             display: flex;
             flex-direction: column;
-            gap: 16px;
+            align-items: center;
+        }
+        .warning-box {
+            background-color: #ffe4e1;
+            color: #d9534f;
+            padding: 10px 20px;
+            border-radius: 8px;
             margin-bottom: 20px;
+            font-size: 14px;
+            display: none;
         }
         .message {
-            max-width: 85%;
-            padding: 14px 18px;
-            border-radius: 20px;
-            line-height: 1.6;
-            font-size: 15px;
-            animation: fadeInUp 0.3s ease-out;
-            word-wrap: break-word;
-            white-space: pre-wrap;
+            max-width: 800px;
+            width: 100%;
+            margin-bottom: 15px;
+            padding: 15px;
+            border-radius: 12px;
+            background: #fff;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
         }
-        @keyframes fadeInUp {
-            from { opacity: 0; transform: translateY(20px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-        .user {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
+        .message.user {
+            background: #e6e6fa;
             align-self: flex-end;
-            border-bottom-right-radius: 6px;
-            box-shadow: 0 4px 15px rgba(102,126,234,0.3);
         }
-        .ai {
-            background: white;
-            color: #1f2937;
-            align-self: flex-start;
-            border-bottom-left-radius: 6px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+        .message img {
+            max-width: 200px;
+            border-radius: 8px;
+            display: block;
+            margin-bottom: 10px;
         }
-        .input-section {
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(10px);
-            border-radius: 24px;
+        .input-area {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
             padding: 20px;
-            box-shadow: 0 -4px 20px rgba(0,0,0,0.05);
+            background-color: transparent;
         }
-        .quick-btns {
+        .input-box-wrapper {
+            background-color: #fff;
+            border-radius: 20px;
+            padding: 15px 25px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+            width: 100%;
+            max-width: 800px;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+        .top-buttons {
+            display: flex;
+            justify-content: flex-start;
+        }
+        .btn-start {
+            background: linear-gradient(135deg, #7b68ee, #483d8b);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        .input-row {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            width: 100%;
+        }
+        .btn-icon {
+            background-color: #f0f0f0;
+            border: none;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+        }
+        input[type="text"] {
+            flex: 1;
+            border: 1px solid #eee;
+            padding: 12px 15px;
+            border-radius: 12px;
+            font-size: 16px;
+            outline: none;
+        }
+        .btn-send {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 10px 25px;
+            border-radius: 12px;
+            font-size: 16px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        .btn-send:hover {
+            background-color: var(--primary-hover);
+        }
+        #file-input {
+            display: none;
+        }
+        .preview-area {
             display: flex;
             gap: 10px;
             overflow-x: auto;
-            padding-bottom: 12px;
-            margin-bottom: 12px;
-            scrollbar-width: none;
         }
-        .quick-btn {
-            padding: 12px 24px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            border: none;
-            border-radius: 24px;
-            white-space: nowrap;
-            cursor: pointer;
-            font-size: 15px;
-            color: white;
-            font-weight: 600;
-            transition: all 0.2s;
-            box-shadow: 0 4px 15px rgba(102,126,234,0.3);
-        }
-        .quick-btn:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(102,126,234,0.4); }
-        .image-preview-area {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 10px;
-            margin-bottom: 10px;
-            padding: 10px;
-            background: #f9f9f9;
-            border-radius: 16px;
-        }
-        .image-preview {
-            position: relative;
-            width: 80px;
-            height: 80px;
+        .preview-area img {
+            height: 60px;
             border-radius: 8px;
-            overflow: hidden;
-            border: 1px solid #ddd;
         }
-        .image-preview img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-        }
-        .image-preview .remove-btn {
-            position: absolute;
-            top: 2px;
-            right: 2px;
-            background: rgba(0,0,0,0.5);
-            color: white;
-            border: none;
-            border-radius: 50%;
-            width: 20px;
-            height: 20px;
-            font-size: 12px;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-        .upload-btn {
-            padding: 14px;
-            background: #e5e7eb;
-            border: none;
-            border-radius: 20px;
-            cursor: pointer;
-            font-size: 15px;
-            color: #4b5563;
-            transition: all 0.2s;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-        .upload-btn:hover { background: #d1d5db; }
-        .input-box {
-            display: flex;
-            gap: 12px;
-            align-items: flex-end;
-        }
-        textarea {
-            flex: 1;
-            padding: 14px 18px;
-            border: 2px solid #e5e7eb;
-            border-radius: 20px;
-            outline: none;
-            font-size: 15px;
-            resize: none;
-            font-family: inherit;
-            line-height: 1.5;
-            max-height: 120px;
-            min-height: 52px;
-        }
-        textarea:focus { border-color: #667eea; }
-        .send-btn {
-            padding: 14px 28px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            border: none;
-            border-radius: 20px;
-            cursor: pointer;
-            font-weight: 600;
-            font-size: 15px;
-            transition: all 0.2s;
-            box-shadow: 0 4px 15px rgba(102,126,234,0.3);
-        }
-        .send-btn:hover:not(:disabled) { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(102,126,234,0.4); }
-        .send-btn:disabled { opacity: 0.6; cursor: not-allowed; }
-        .typing {
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            padding: 18px;
-        }
-        .typing span {
-            width: 10px;
-            height: 10px;
-            background: #9ca3af;
-            border-radius: 50%;
-            animation: typing 1.4s infinite ease-in-out both;
-        }
-        .typing span:nth-child(1) { animation-delay: -0.32s; }
-        .typing span:nth-child(2) { animation-delay: -0.16s; }
-        @keyframes typing {
-            0%,80%,100% { transform: scale(0); }
-            40% { transform: scale(1); }
-        }
-        .error { background: #fee2e2 !important; color: #dc2626 !important; }
-        .system-info {
-            text-align: center;
-            color: #9ca3af;
-            font-size: 12px;
-            padding: 10px;
-        }
-        @media (max-width: 640px) {
-            .chat-container { padding: 10px; }
-            .message { max-width: 90%; font-size: 14px; }
-            .header h1 { font-size: 20px; }
-            .quick-btn { padding: 10px 20px; font-size: 14px; }
-        }
-    <!DOCTYPE html>
     </style>
 </head>
 <body>
+
     <div class="header">
         <h1>🎓 AI Student Portraits · 多模态版</h1>
-        <p>学生AI心理画像分析系统（豆包1.5视觉支持）</p>
+        <p>学生AI心理画像分析系统（支持视觉分析）</p>
     </div>
-    
-    <div class="chat-container">
-        <div class="chat-box" id="chatBox"></div>
-        
-        <div class="input-section">
-            <div class="quick-btns">
-                <button class="quick-btn" onclick="quickSend('开始心理画像')">🎯 开始心理画像</button>
+
+    <div class="chat-container" id="chat-container">
+        <div class="warning-box" id="persona-warning">
+            ⚠️ 人设文件加载失败，请确保存在 persona.txt 文件。
+        </div>
+        </div>
+
+    <div class="input-area">
+        <div class="input-box-wrapper">
+            <div class="top-buttons">
+                <button class="btn-start" id="start-btn">🎯 开始心理画像</button>
             </div>
-            
-            <div id="imagePreviewArea" class="image-preview-area" style="display: none;"></div>
-            
-            <div class="input-box">
-                <button class="upload-btn" id="uploadBtn" title="上传图片（可多选）">📷</button>
-                <input type="file" id="fileInput" accept="image/*" style="display: none;" multiple>
-                <textarea 
-                    id="userInput" 
-                    placeholder="输入你想说的话，按 Enter 发送..." 
-                    rows="1"
-                    oninput="autoResize(this)"
-                    onkeydown="handleKeyDown(event)"
-                ></textarea>
-                <button class="send-btn" onclick="sendMessage()" id="sendBtn">发送</button>
+            <div class="preview-area" id="preview-area"></div>
+            <div class="input-row">
+                <button class="btn-icon" onclick="document.getElementById('file-input').click()">📷</button>
+                <input type="file" id="file-input" accept="image/*" multiple>
+                <input type="text" id="user-input" placeholder="输入你想说的话，按 Enter 发送..." onkeypress="handleKeyPress(event)">
+                <button class="btn-send" id="send-btn" onclick="sendMessage()">发送</button>
             </div>
         </div>
-        
-        <div class="system-info">Powered by 豆包1.5视觉版 · 图片可被真实分析</div>
     </div>
 
     <script>
-        // ========== 配置 ==========
-        const WORKER_URL = '/api'; 
-        // 硬编码 system prompt（原 persona.txt 内容）
-        const SYSTEM_PROMPT = `你是一位专业的AI心理画像助手，擅长通过对话和图片分析学生的心理状态，生成个性化的心理画像报告。你的回答应当温暖、专业、有洞察力。`;
-
-        // ========== 全局变量 ==========
-        const chatBox = document.getElementById('chatBox');
-        const userInput = document.getElementById('userInput');
-        const sendBtn = document.getElementById('sendBtn');
-        const fileInput = document.getElementById('fileInput');
-        const uploadBtn = document.getElementById('uploadBtn');
-        const imagePreviewArea = document.getElementById('imagePreviewArea');
+        const WORKER_URL = "https://aipsychologicalchat.tielurenou86.workers.dev"; 
         
-        let isLoading = false;
-        let conversation = [{ role: 'system', content: SYSTEM_PROMPT }];  // 直接包含 system
-        let selectedFiles = [];
+        let systemPersona = "";
+        let chatHistory = [];
+        let selectedImagesBase64 = [];
 
-        // ========== 初始化 ==========
-        window.onload = () => {
-            userInput.focus();
-            addMessage('你好！我是AI心理画像助手。我可以帮助你了解自己的心理状态，生成个性化的心理画像报告。点击下方的"开始心理画像"按钮，或直接输入文字并上传图片，我会结合图片内容进行分析。', 'ai');
+        // 页面加载时获取 persona.txt
+        window.onload = async () => {
+            try {
+                const response = await fetch('./persona.txt');
+                if (response.ok) {
+                    systemPersona = await response.text();
+                    chatHistory.push({ role: "system", content: systemPersona });
+                } else {
+                    document.getElementById('persona-warning').style.display = 'block';
+                }
+            } catch (error) {
+                document.getElementById('persona-warning').style.display = 'block';
+            }
         };
 
-        // ========== 图片上传与预览 ==========
-        uploadBtn.addEventListener('click', () => fileInput.click());
-
-        fileInput.addEventListener('change', (e) => {
-            const files = Array.from(e.target.files);
-            selectedFiles = [...selectedFiles, ...files];
-            renderImagePreviews();
-            fileInput.value = '';  // 清空以便再次选择同一文件
+        // 处理图片上传预览并转换为 Base64
+        document.getElementById('file-input').addEventListener('change', function(event) {
+            const files = event.target.files;
+            const previewArea = document.getElementById('preview-area');
+            
+            for (let file of files) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const base64Data = e.target.result;
+                    selectedImagesBase64.push(base64Data);
+                    
+                    const img = document.createElement('img');
+                    img.src = base64Data;
+                    previewArea.appendChild(img);
+                }
+                reader.readAsDataURL(file);
+            }
         });
 
-        function renderImagePreviews() {
-            if (selectedFiles.length === 0) {
-                imagePreviewArea.style.display = 'none';
-                return;
-            }
-            imagePreviewArea.style.display = 'flex';
-            imagePreviewArea.innerHTML = '';
-            selectedFiles.forEach((file, index) => {
-                const reader = new FileReader();
-                reader.onload = (e) => {
-                    const previewDiv = document.createElement('div');
-                    previewDiv.className = 'image-preview';
-                    previewDiv.innerHTML = `
-                        <img src="${e.target.result}" alt="预览">
-                        <button class="remove-btn" data-index="${index}">✕</button>
-                    `;
-                    imagePreviewArea.appendChild(previewDiv);
-                    previewDiv.querySelector('.remove-btn').addEventListener('click', () => {
-                        selectedFiles.splice(index, 1);
-                        renderImagePreviews();
-                    });
-                };
-                reader.readAsDataURL(file);
-            });
-        }
-
-        // ========== 输入框自适应 ==========
-        function autoResize(textarea) {
-            textarea.style.height = 'auto';
-            textarea.style.height = Math.min(textarea.scrollHeight, 120) + 'px';
-        }
-
-        function handleKeyDown(e) {
-            if (e.key === 'Enter' && !e.shiftKey) {
-                e.preventDefault();
+        function handleKeyPress(event) {
+            if (event.key === 'Enter') {
                 sendMessage();
             }
         }
 
-        function quickSend(text) {
-            userInput.value = text;
-            autoResize(userInput);
-            sendMessage();
-        }
-
-        // ========== 消息显示 ==========
-        function addMessage(text, sender, isError = false) {
-            const div = document.createElement('div');
-            div.className = `message ${sender} ${isError ? 'error' : ''}`;
-            div.textContent = text;
-            chatBox.appendChild(div);
-            chatBox.scrollTop = chatBox.scrollHeight;
-        }
-
-        function showTyping() {
-            const div = document.createElement('div');
-            div.id = 'typing';
-            div.className = 'message ai typing';
-            div.innerHTML = '<span></span><span></span><span></span>';
-            chatBox.appendChild(div);
-            chatBox.scrollTop = chatBox.scrollHeight;
-        }
-
-        function hideTyping() {
-            const typing = document.getElementById('typing');
-            if (typing) typing.remove();
-        }
-
-        // ========== 发送消息（支持文字+多图片） ==========
         async function sendMessage() {
-            const text = userInput.value.trim();
-            if (!text && selectedFiles.length === 0) return;  // 无内容不发送
-            if (isLoading) return;
+            const inputField = document.getElementById('user-input');
+            const text = inputField.value.trim();
+            
+            if (!text && selectedImagesBase64.length === 0) return;
 
-            // 1. 如果有文字，将其作为新的用户消息加入 conversation
-            if (text) {
-                conversation.push({ role: 'user', content: text });
-            } else {
-                // 只有图片没有文字，添加一个空字符串（后端会补充默认提示）
-                conversation.push({ role: 'user', content: '' });
-            }
-
-            // 2. 在界面上显示用户消息
-            if (text) {
-                addMessage(text, 'user');
-            }
-            if (selectedFiles.length > 0) {
-                addMessage(`📷 上传了 ${selectedFiles.length} 张图片（正在分析...）`, 'user');
-            }
-
-            // 3. 清空输入框和图片预览
-            userInput.value = '';
-            userInput.style.height = 'auto';
-            const filesToSend = [...selectedFiles];
-            selectedFiles = [];
-            renderImagePreviews();
-
-            // 4. 构造 FormData
-            const formData = new FormData();
-            formData.append('messages', JSON.stringify(conversation));
-            filesToSend.forEach((file, i) => {
-                formData.append(`image${i}`, file);
+            // 1. 构建当前消息
+            let messageContent = [];
+            if (text) messageContent.push({ type: "text", text: text });
+            selectedImagesBase64.forEach(base64 => {
+                messageContent.push({ type: "image_url", image_url: { url: base64 } });
             });
 
-            // 5. 发送请求
-            isLoading = true;
-            sendBtn.disabled = true;
-            showTyping();
+            const userMessage = { role: "user", content: messageContent };
+            chatHistory.push(userMessage);
 
+            // 2. 更新 UI
+            appendMessageToUI("user", text, selectedImagesBase64);
+            
+            // 清空输入框和预览区
+            inputField.value = '';
+            selectedImagesBase64 = [];
+            document.getElementById('preview-area').innerHTML = '';
+            document.getElementById('send-btn').innerText = '发送中...';
+            document.getElementById('send-btn').disabled = true;
+
+            // 3. 发送请求给 Cloudflare Worker
             try {
                 const response = await fetch(WORKER_URL, {
-                    method: 'POST',
-                    body: formData
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ messages: chatHistory })
                 });
 
-                hideTyping();
-
-                if (!response.ok) throw new Error(`HTTP ${response.status}`);
                 const data = await response.json();
-                if (data.error) throw new Error(data.error);
-
-                const reply = data.choices[0].message.content;
-                addMessage(reply, 'ai');
-                conversation.push({ role: 'assistant', content: reply });
-
+                
+                if (data.choices && data.choices.length > 0) {
+                    const aiReply = data.choices[0].message.content;
+                    chatHistory.push({ role: "assistant", content: aiReply });
+                    appendMessageToUI("assistant", aiReply, []);
+                } else {
+                    appendMessageToUI("assistant", "API 请求返回异常：" + JSON.stringify(data), []);
+                }
             } catch (error) {
-                hideTyping();
-                addMessage('抱歉，连接出现问题：' + error.message + '\n\n请检查网络连接或稍后重试。', 'ai', true);
-                console.error('Error:', error);
-                // 出错时移除刚刚添加的用户消息，避免上下文混乱
-                conversation.pop(); // 移除刚才 push 的 user 消息
+                appendMessageToUI("assistant", "请求失败，请检查网络或后端配置。" + error.message, []);
             } finally {
-                isLoading = false;
-                sendBtn.disabled = false;
-                userInput.focus();
+                document.getElementById('send-btn').innerText = '发送';
+                document.getElementById('send-btn').disabled = false;
             }
         }
+
+        function appendMessageToUI(role, text, imagesBase64) {
+            const container = document.getElementById('chat-container');
+            const msgDiv = document.createElement('div');
+            msgDiv.className = `message ${role}`;
+            
+            if (imagesBase64 && imagesBase64.length > 0) {
+                imagesBase64.forEach(img => {
+                    const imgElem = document.createElement('img');
+                    imgElem.src = img;
+                    msgDiv.appendChild(imgElem);
+                });
+            }
+            if (text) {
+                const textDiv = document.createElement('div');
+                textDiv.innerText = text;
+                msgDiv.appendChild(textDiv);
+            }
+            
+            container.appendChild(msgDiv);
+            container.scrollTop = container.scrollHeight;
+        }
+
+        // 绑定“开始心理画像”按钮（可自定义发送特定的初始 Prompt）
+        document.getElementById('start-btn').addEventListener('click', () => {
+            document.getElementById('user-input').value = "请根据我接下来提供的信息，开始进行心理画像分析。";
+            sendMessage();
+        });
     </script>
 </body>
 </html>
-
-
 
 
