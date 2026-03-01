@@ -95,19 +95,50 @@
             padding: 20px;
             background: transparent;
             display: flex;
-            justify-content: center;
+            flex-direction: column;
+            align-items: center;
         }
         .input-box-wrapper {
             background: white;
             padding: 12px 20px;
-            border-radius: 30px;
+            border-radius: 25px;
             display: flex;
-            align-items: center;
-            gap: 12px;
+            flex-direction: column;
+            gap: 10px;
             width: 100%;
             max-width: 800px;
             box-shadow: 0 4px 20px rgba(0,0,0,0.08);
         }
+
+        /* 快捷按钮行 */
+        .quick-actions {
+            display: flex;
+            gap: 10px;
+            width: 100%;
+        }
+        .btn-start {
+            background: linear-gradient(135deg, #7b68ee, #483d8b);
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 15px;
+            font-size: 14px;
+            cursor: pointer;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            transition: transform 0.2s;
+        }
+        .btn-start:active { transform: scale(0.95); }
+
+        .input-row {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            width: 100%;
+        }
+
         #user-input {
             flex: 1;
             border: none;
@@ -123,6 +154,10 @@
             border-radius: 50%;
             cursor: pointer;
             transition: 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
         }
         .btn-icon:hover { background: #e0e0e0; }
         .btn-send {
@@ -135,19 +170,20 @@
             cursor: pointer;
         }
         .preview-area {
-            position: absolute;
-            bottom: 90px;
             display: flex;
             gap: 10px;
+            margin-bottom: 5px;
+            width: 100%;
+            overflow-x: auto;
         }
-        .preview-area img { height: 50px; border-radius: 6px; border: 2px solid white; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+        .preview-area img { height: 50px; border-radius: 6px; border: 1px solid #eee; }
     </style>
 </head>
 <body>
 
     <div class="header">
         <h1>🎓 AI Student Portraits</h1>
-        <p>学生心理画像分析系统 (豆包1.5视觉支持)</p>
+        <p>学生心理画像分析系统 (豆包2.0视觉支持)</p>
     </div>
 
     <div class="chat-container" id="chat-container">
@@ -158,12 +194,19 @@
     </div>
 
     <div class="input-area">
-        <div class="preview-area" id="preview-area"></div>
         <div class="input-box-wrapper">
-            <button class="btn-icon" onclick="document.getElementById('file-input').click()">📷</button>
-            <input type="file" id="file-input" accept="image/*" multiple style="display:none" onchange="handleFile(event)">
-            <input type="text" id="user-input" placeholder="输入你想说的话..." onkeypress="if(event.key==='Enter') sendMessage()">
-            <button class="btn-send" id="send-btn" onclick="sendMessage()">发送</button>
+            <div class="quick-actions">
+                <button class="btn-start" onclick="startPortrait()">🎯 开始心理画像</button>
+            </div>
+            
+            <div class="preview-area" id="preview-area"></div>
+
+            <div class="input-row">
+                <button class="btn-icon" onclick="document.getElementById('file-input').click()">📷</button>
+                <input type="file" id="file-input" accept="image/*" multiple style="display:none" onchange="handleFile(event)">
+                <input type="text" id="user-input" placeholder="输入你想说的话..." onkeypress="if(event.key==='Enter') sendMessage()">
+                <button class="btn-send" id="send-btn" onclick="sendMessage()">发送</button>
+            </div>
         </div>
     </div>
 
@@ -172,7 +215,6 @@
         let chatHistory = [];
         let currentImages = [];
 
-        // 尝试加载人设，但不弹红框，如果失败就静默处理
         window.onload = async () => {
             try {
                 const res = await fetch('./persona.txt');
@@ -211,7 +253,6 @@
             appendUI("user", text, currentImages);
             chatHistory.push({ role: "user", content: contentArr });
 
-            // 重置
             input.value = "";
             currentImages = [];
             document.getElementById('preview-area').innerHTML = "";
@@ -264,9 +305,17 @@
             container.appendChild(row);
             container.scrollTop = container.scrollHeight;
         }
+
+        // 快捷画像功能
+        function startPortrait() {
+            const input = document.getElementById('user-input');
+            input.value = "开始为我进行心理画像分析。";
+            sendMessage();
+        }
     </script>
 </body>
 </html>
+
 
 
 
